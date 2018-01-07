@@ -264,14 +264,48 @@ MonoBehaviour:
   opponent: {fileID: 0}
   attack: {fileID: 7400006, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   die: {fileID: 7400010, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
-  damage: 10
+  damage: 30
   impactTime: 0.359
   range: 1.25
-  health: 100
+  maxHealth: 300
+  health: 300
+  combatEscapeTime: 10
+  countDown: 0
+  isSpecialAttackOn: 0
 --- !u!4 &196222483 stripped
 Transform:
   m_PrefabParentObject: {fileID: 400016, guid: a2cb09cf998faef4fb7887e15c3608c1, type: 2}
   m_PrefabInternal: {fileID: 196222478}
+--- !u!114 &196222485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 196222479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f053e25c8a2593543b59a73c5e946bad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  level: 1
+  exp: 0
+  player: {fileID: 196222482}
+--- !u!114 &196222486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 196222479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4764b59e81d66346828f7d969812192, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 196222482}
+  key: 115
+  damagePercentage: 1.5
+  stunTime: 4
+  inAction: 0
 --- !u!1 &469015432
 GameObject:
   m_ObjectHideFlags: 0
@@ -358,15 +392,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3fce0dd02e37c24eb0aa985a0045a15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
+  speed: 3
   range: 1.25
   player: {fileID: 196222483}
+  playerLevel: {fileID: 196222485}
   run: {fileID: 7400002, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   idle: {fileID: 7400000, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   die: {fileID: 7400010, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   attack: {fileID: 7400006, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
+  maxHealth: 40
   health: 100
-  damage: 10
+  damage: 100
+  exp: 50
   impactTime: 0.359
 --- !u!143 &584217767
 CharacterController:
@@ -403,12 +440,15 @@ MonoBehaviour:
   speed: 5
   range: 1.25
   player: {fileID: 196222483}
+  playerLevel: {fileID: 196222485}
   run: {fileID: 7400002, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   idle: {fileID: 7400000, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   die: {fileID: 7400010, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   attack: {fileID: 7400006, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
+  maxHealth: 100
   health: 100
   damage: 10
+  exp: 100
   impactTime: 0.359
 --- !u!143 &815010038
 CharacterController:
@@ -752,15 +792,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3fce0dd02e37c24eb0aa985a0045a15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
+  speed: 9
   range: 1.25
   player: {fileID: 196222483}
+  playerLevel: {fileID: 196222485}
   run: {fileID: 7400002, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   idle: {fileID: 7400000, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   die: {fileID: 7400010, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
   attack: {fileID: 7400006, guid: 86c591ebd74142c4d93243d9fa9544da, type: 3}
+  maxHealth: 1000
   health: 100
-  damage: 10
+  damage: 1
+  exp: 150
   impactTime: 0.359
 --- !u!143 &1576070005
 CharacterController:
@@ -893,3 +936,64 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d139727d46a14204285626a8b7ef9525, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &1667875410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1667875412}
+  - component: {fileID: 1667875411}
+  m_Layer: 0
+  m_Name: GUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1667875411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1667875410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8873f1d442686bf40bead54ea73aa595, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frame: {fileID: 2800000, guid: 73136f1d98acc09449b45feea7b43f2f, type: 3}
+  framePos:
+    serializedVersion: 2
+    x: 0
+    y: 30
+    width: 700
+    height: 100
+  healthBar: {fileID: 2800000, guid: 72d25c297c7ae3440a4d2f69fc99f8f5, type: 3}
+  healthBarPos:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 100
+    height: 100
+  horizontalDistance: 0.105
+  verticalDistance: 0.27
+  widthScale: 0.79
+  heightScale: 0.44
+  player: {fileID: 196222482}
+  target: {fileID: 0}
+  healthPercentage: 0
+--- !u!4 &1667875412
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1667875410}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 15.080766, y: 2.6321921, z: 24.595118}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

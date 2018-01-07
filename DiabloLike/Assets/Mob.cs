@@ -9,6 +9,7 @@ public class Mob : MonoBehaviour {
 	private CharacterController controller;
 	public Transform player;
 	private Fighter opponent;
+	public LevelSystem playerLevel;
 
 	public AnimationClip run;
 	public AnimationClip idle;
@@ -16,11 +17,15 @@ public class Mob : MonoBehaviour {
 	public AnimationClip attack;
 	private Animation anim;
 
-	[SerializeField] private int health = 100;
+	public int maxHealth = 100;
+	public int health;
 	public int damage = 10;
+	public int exp = 50;
 
 	public float impactTime = 0.359f; // based on attacking animation percent (Frame 12)
 	private bool impacted = false;
+	private bool stunned = false;
+	private int stunTime;
 
 	// Use this for initialization
 	void Start () 
@@ -28,6 +33,7 @@ public class Mob : MonoBehaviour {
 		controller = GetComponent<CharacterController> ();	
 		anim = GetComponent<Animation> ();
 		opponent = player.GetComponent<Fighter> ();
+		health = maxHealth;
 	}
 	
 	// Update is called once per frame
@@ -35,19 +41,25 @@ public class Mob : MonoBehaviour {
 	{
 		if (!IsDead ())
 		{
-			if (!InRange ())
-				Chase ();
-			else if (!opponent.IsDead ())
-				Attack ();
-			else
-				anim.CrossFade (idle.name);
+			if (stunTime <= 0) 
+			{
+				if (!InRange ())
+					Chase ();
+				else if (!opponent.IsDead ())
+					Attack ();
+				else
+					anim.CrossFade (idle.name);
+			}
 		}
 		else
 		{
 			anim.CrossFade (die.name);
 
-			if(anim[die.name].time > 0.9 * anim[die.name].length)
-				Destroy(gameObject);
+			if (anim [die.name].time > 0.9 * anim [die.name].length)
+			{
+				playerLevel.exp += exp;
+				Destroy (gameObject);
+			}
 		}
 	}
 
@@ -79,12 +91,27 @@ public class Mob : MonoBehaviour {
 			return false;
 	}
 
-	public void GetHit(int damage)
+	public void GetHit(float damage)
 	{
-		health -= damage;
+		health -= (int)damage;
 
 		if (health < 0)
 			health = 0;
+	}
+
+	public void GetStun(int seconds)
+	{
+		stunTime = seconds;
+		CancelInvoke ("StunCountDown");
+		InvokeRepeating ("StunCountDown", 1, 1);
+	}
+
+	void StunCountDown()
+	{
+		--stunTime;
+
+		if (stunTime == 0)
+			CancelInvoke ("StunCountDown");
 	}
 
 	void Chase()

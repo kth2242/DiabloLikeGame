@@ -14,26 +14,42 @@ public class Fighter : MonoBehaviour {
 	public float impactTime = 0.359f; // based on attacking animation percent (Frame 12)
 	private bool impacted = false;
 	public float range = 1.25f;
-	[SerializeField] private int health = 100;
+	public int maxHealth = 300;
+	public int health;
 
 	private bool isDieAnimStarted = false;
 	private bool isDieAnimEnded = false;
 
+	public float combatEscapeTime = 10f;
+	public float countDown;
+
+	public bool isSpecialAttackOn = false;
+
 	// Use this for initialization
-	void Start () {
+	void Start () 
+	{
+		health = maxHealth;
 		anim = GetComponent<Animation>();
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
-		if (Input.GetKey(KeyCode.Space) && opponent != null)
+	void Update ()
+	{
+		if(!isSpecialAttackOn)
+			AttackUpdate (0, 1f, KeyCode.Space);
+
+		if (IsDead () && !isDieAnimEnded)
+			Die ();
+	}
+
+	public void AttackUpdate(int stunSeconds, float scaleDamage, KeyCode key)
+	{
+		if (Input.GetKey(key) && opponent != null
+			&& !IsDead() && InRange())
 		{
-			if (InRange())
-			{
-				anim.CrossFade (attack.name);
-				isAttacking = true;	
-				transform.LookAt (opponent.transform.position);
-			}
+			anim.CrossFade (attack.name);
+			isAttacking = true;	
+			transform.LookAt (opponent.transform.position);
 		}
 
 		// if attacking animation is almost ended
@@ -41,15 +57,27 @@ public class Fighter : MonoBehaviour {
 		{
 			isAttacking = false;
 			impacted = false;
+
+			if (isSpecialAttackOn) 
+				isSpecialAttackOn = false;
 		}
 
-		Impact();
-
-		if (IsDead () && !isDieAnimEnded)
-			Die ();
+		Impact(stunSeconds, scaleDamage);
 	}
 
-	void Impact()
+	public void ResetAttackUpdate()
+	{
+		isAttacking = false;
+
+		// to make the inner code be called once
+		if (!isSpecialAttackOn) 
+		{
+			impacted = false;
+			anim.Stop (attack.name);
+		}
+	}
+
+	void Impact(int stunSeconds, float scaleDamage)
 	{
 		if ((opponent != null) && anim.IsPlaying (attack.name) && impacted == false)
 		{
@@ -58,10 +86,24 @@ public class Fighter : MonoBehaviour {
 			if (anim [attack.name].time > anim [attack.name].length * impactTime
 			  && anim[attack.name].time < 0.9 * anim[attack.name].length)
 			{
-				opponent.GetComponent<Mob>().GetHit(damage);
+				countDown = combatEscapeTime;
+				CancelInvoke ("CombatCountDown"); // if there are InvokeRepeating with a function(method) name "CombatCountDown", cancel it
+				InvokeRepeating ("CombatCountDown", 1, 1);  // parameter : function(method) name,
+															//            delay time before start (0 : start immediately, 1 : start after 1 second to prevent count down start at (combatEscapeTime-1)),
+															//            how frequently invoke (1 : per a second)
+				opponent.GetComponent<Mob>().GetHit((float)damage*scaleDamage);
+				opponent.GetComponent<Mob>().GetStun(stunSeconds);
 				impacted = true;
 			}
 		}
+	}
+
+	void CombatCountDown()
+	{
+		--countDown;
+
+		if (countDown == 0)
+			CancelInvoke ("CombatCountDown"); // stop InvokeRepeating with a function(method) name "CombatCountDown"
 	}
 
 	bool InRange()
