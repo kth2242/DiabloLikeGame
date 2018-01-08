@@ -11,6 +11,8 @@ public class ClickToMove : MonoBehaviour {
 	public AnimationClip idle;
 	private Animation anim;
 
+	public static Vector3 cursorPos;
+
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<CharacterController> ();
@@ -21,6 +23,8 @@ public class ClickToMove : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{
+		CursorUpdate ();
+
 		if (!Fighter.isAttacking && !Fighter.isDead)
 		{
 			if (Input.GetKey(KeyCode.Mouse0)) //GetMouseButtonDown (0))
@@ -43,6 +47,17 @@ public class ClickToMove : MonoBehaviour {
 		{
 			if (hit.collider.tag != "Player" && hit.collider.tag != "Enemy")
 				position = hit.point;
+		}
+	}
+
+	void CursorUpdate()
+	{
+		RaycastHit hit;
+		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+
+		if(Physics.Raycast(ray, out hit, 1000f))
+		{
+			cursorPos = hit.point;
 		}
 	}
 

@@ -23,7 +23,9 @@ public class Fighter : MonoBehaviour {
 	public float combatEscapeTime = 10f;
 	public float countDown;
 
-	public bool isSpecialAttackOn = false;
+	private bool inAction = false;
+	private int ballCount = 0;
+	public float desireSkillAngle = 40f;
 
 	// Use this for initialization
 	void Start () 
@@ -35,21 +37,39 @@ public class Fighter : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{
-		if(!isSpecialAttackOn)
-			AttackUpdate (0, 1f, KeyCode.Space);
+		if (Input.GetKey(KeyCode.Space))
+			inAction = true;
+
+		if (inAction) 
+		{
+			if (!AttackUpdate (KeyCode.Space, null, 0, true))
+				inAction = false;
+		}
 
 		if (IsDead () && !isDieAnimEnded)
 			Die ();
 	}
 
-	public void AttackUpdate(int stunSeconds, float scaleDamage, KeyCode key)
+	public bool AttackUpdate(KeyCode key, GameObject ball, int ballNum, bool opponentBased)
 	{
-		if (Input.GetKey(key) && opponent != null
-			&& !IsDead() && InRange())
+		if (opponentBased)
 		{
-			anim.CrossFade (attack.name);
-			isAttacking = true;	
-			transform.LookAt (opponent.transform.position);
+			if (Input.GetKey (key) && opponent != null
+			   && !IsDead () && InRange ()) 
+			{
+				anim.CrossFade (attack.name);
+				isAttacking = true;	
+				transform.LookAt (opponent.transform.position);
+			}
+		}
+		else
+		{
+			if (Input.GetKey (key) && !IsDead ()) 
+			{
+				anim.CrossFade (attack.name);
+				isAttacking = true;	
+				transform.LookAt (ClickToMove.cursorPos);
+			}
 		}
 
 		// if attacking animation is almost ended
@@ -57,29 +77,23 @@ public class Fighter : MonoBehaviour {
 		{
 			isAttacking = false;
 			impacted = false;
-
-			if (isSpecialAttackOn) 
-				isSpecialAttackOn = false;
+			ballCount = 0;
+			return false;
 		}
-
-		Impact(stunSeconds, scaleDamage);
+		Impact(ball, ballNum, opponentBased);
+		return true;
 	}
 
 	public void ResetAttackUpdate()
 	{
 		isAttacking = false;
-
-		// to make the inner code be called once
-		if (!isSpecialAttackOn) 
-		{
-			impacted = false;
-			anim.Stop (attack.name);
-		}
+		impacted = false;
+		anim.Stop (attack.name);
 	}
 
-	void Impact(int stunSeconds, float scaleDamage)
+	void Impact(GameObject ball, int ballNum, bool opponentBased)
 	{
-		if ((opponent != null) && anim.IsPlaying (attack.name) && impacted == false)
+		if ((!opponentBased || opponent != null) && anim.IsPlaying(attack.name) && impacted == false)
 		{
 			// to make opponent get hit once per one attacking action not per every attacking action frame
 			// if the time of the current playing attacking animation is over the time of the attacking animation's impact frame
@@ -91,9 +105,36 @@ public class Fighter : MonoBehaviour {
 				InvokeRepeating ("CombatCountDown", 1, 1);  // parameter : function(method) name,
 															//            delay time before start (0 : start immediately, 1 : start after 1 second to prevent count down start at (combatEscapeTime-1)),
 															//            how frequently invoke (1 : per a second)
-				opponent.GetComponent<Mob>().GetHit((float)damage*scaleDamage);
-				opponent.GetComponent<Mob>().GetStun(stunSeconds);
-				impacted = true;
+				if(opponentBased)
+				{
+					opponent.GetComponent<Mob>().GetHit(damage);
+					impacted = true;
+				}
+
+				// send out spheres (projectile)
+				if (ball != null)
+				{
+					Quaternion rot = transform.rotation;
+					rot.x = 0;
+					rot.z = 0;
+
+					if (ballNum == 1 && ballCount < ballNum)
+					{
+						Instantiate (ball, new Vector3 (transform.position.x, transform.position.y + 0.9f, transform.position.z), rot);
+						++ballCount;
+					}
+					else if(ballNum > 1)
+					{
+						float diff = desireSkillAngle / (ballNum - 1);
+
+						while (ballCount < ballNum)
+						{
+							GameObject newBall = Instantiate (ball, new Vector3 (transform.position.x, transform.position.y + 0.9f, transform.position.z), rot);
+							newBall.transform.Rotate (Vector3.up * (-(desireSkillAngle / 2) + diff * ballCount));
+							++ballCount;
+						}
+					}
+				}
 			}
 		}
 	}

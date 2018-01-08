@@ -24,7 +24,6 @@ public class Mob : MonoBehaviour {
 
 	public float impactTime = 0.359f; // based on attacking animation percent (Frame 12)
 	private bool impacted = false;
-	private bool stunned = false;
 	private int stunTime;
 
 	// Use this for initialization
@@ -91,9 +90,12 @@ public class Mob : MonoBehaviour {
 			return false;
 	}
 
-	public void GetHit(float damage)
+	public void GetHit(int damage)
 	{
-		health -= (int)damage;
+		// to show the health bar reduction
+		opponent.opponent = gameObject;
+
+		health -= damage;
 
 		if (health < 0)
 			health = 0;
