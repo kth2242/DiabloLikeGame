@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SpecialAttack : MonoBehaviour {
-	
+
+	public Texture2D skillPicture;
 	public Fighter player;
 	public KeyCode key;
 	private bool inAction = false;
