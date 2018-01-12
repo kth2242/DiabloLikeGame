@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Mob : MonoBehaviour {
 
+	private int id;
+	public static int idAssignCount;
 	public float speed = 10f;
 	public float range = 1.25f;
 	private CharacterController controller;
@@ -32,9 +34,20 @@ public class Mob : MonoBehaviour {
 		controller = GetComponent<CharacterController> ();	
 		anim = GetComponent<Animation> ();
 		opponent = player.GetComponent<Fighter> ();
-		health = maxHealth;
+		AssignID (); // weird method - possible to make unpredictable behavior some day
+		int dataBaseHealth = DataBase.ReadMobHealth (id);
+		if (dataBaseHealth != -1)
+			health = dataBaseHealth;
+		else
+			health = maxHealth;		
 	}
-	
+
+	void AssignID()
+	{
+		this.id = idAssignCount;
+		++idAssignCount;
+	}
+
 	// Update is called once per frame
 	void Update ()
 	{
@@ -99,6 +112,8 @@ public class Mob : MonoBehaviour {
 
 		if (health < 0)
 			health = 0;
+
+		DataBase.SaveMobHealth (this.id, this.health);
 	}
 
 	public void GetStun(int seconds)

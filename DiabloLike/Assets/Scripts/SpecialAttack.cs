@@ -10,11 +10,12 @@ public class SpecialAttack : MonoBehaviour {
 	private bool inAction = false;
 	public GameObject ball;
 	public int ballNum = 1;
+	public bool isActivated = true;
 
 	// Update is called once per frame
 	void Update () 
 	{
-		if (Input.GetKey(key) && !inAction)
+		if (isActivated && Input.GetKey(key) && !inAction)
 		{
 			player.ResetAttackUpdate ();
 			inAction = true;

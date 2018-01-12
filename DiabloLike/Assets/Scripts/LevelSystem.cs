@@ -34,6 +34,6 @@ public class LevelSystem : MonoBehaviour {
 	{
 		player.maxHealth += 100;
 		player.health = player.maxHealth;
-		player.damage += (int)Mathf.Pow(level-1, 2) * 50;
+		player.damage += (int)Mathf.Pow(level-1, 2) * 5;
 	}
 }

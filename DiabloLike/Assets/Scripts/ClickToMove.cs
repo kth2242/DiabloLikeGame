@@ -16,6 +16,7 @@ public class ClickToMove : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<CharacterController> ();
+		transform.position = DataBase.ReadPlayerPosition ();
 		position = transform.position;
 		anim = GetComponent<Animation> ();
 	}
